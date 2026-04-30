@@ -36,7 +36,7 @@ Spring builds the call with the following elements:
 |---|
 | **GET** https://github.com/login/oauth/authorize |
 | Headers: (none) |
-| **Params:** response_type=code, client_id=Ov23liuXpZ3RQ1whTJSx, scope=read:user, state=q-sqDjq2Nd..., redirect_uri=http://localhost:8080/login/oauth2/code/github, code_challenge=6o0DUie..., code_challenge_method=S256 |
+| **Params:** response_type=code, client_id=Ov23...., scope=read:user, state=q-sqDjq2Nd..., redirect_uri=http://localhost:8080/login/oauth2/code/github, code_challenge=6o0DUie..., code_challenge_method=S256 |
 | **Response:** 302 redirect → http://localhost:8080/login/oauth2/code/github?code=46b29...&state=... |
 
 **Parameters:**
