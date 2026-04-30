@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"/>
+  <title>Log Viewer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1e1e1e; color: #d4d4d4; font-family: 'Courier New', monospace; font-size: 13px; }
+    #header { background: #252526; padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #3c3c3c; position: sticky; top: 0; }
+    #header h1 { font-size: 15px; color: #ccc; font-weight: normal; }
+    #status { width: 10px; height: 10px; border-radius: 50%; background: #4ec94e; }
+    #status.disconnected { background: #f44747; }
+    button { background: #3c3c3c; color: #ccc; border: 1px solid #555; padding: 4px 10px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+    button:hover { background: #505050; }
+    #log-container { padding: 8px; height: calc(100vh - 45px); overflow-y: auto; }
+    .log-line { padding: 2px 4px; border-radius: 2px; margin-bottom: 1px; white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
+    .log-line:hover { background: #2a2a2a; }
+    .DEBUG { color: #9cdcfe; }
+    .INFO  { color: #4ec94e; }
+    .WARN  { color: #ce9178; }
+    .ERROR { color: #f44747; background: #1a0000; }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <div id="status"></div>
+    <h1>Log Viewer — OAuth2 / Spring Security</h1>
+    <button onclick="clearLogs()">Pulisci</button>
+    <button onclick="toggleScroll()">Auto-scroll: <span id="scrollLabel">ON</span></button>
+  </div>
+  <div id="log-container"></div>
+
+  <script>
+    const container = document.getElementById('log-container');
+    const statusEl = document.getElementById('status');
+    let autoScroll = true;
+
+    function toggleScroll() {
+      autoScroll = !autoScroll;
+      document.getElementById('scrollLabel').textContent = autoScroll ? 'ON' : 'OFF';
+    }
+
+    function clearLogs() {
+      container.innerHTML = '';
+    }
+
+    function appendLine(text) {
+      const div = document.createElement('div');
+      div.className = 'log-line ' + (text.startsWith('[DEBUG]') ? 'DEBUG' : text.startsWith('[INFO]') ? 'INFO' : text.startsWith('[WARN]') ? 'WARN' : text.startsWith('[ERROR]') ? 'ERROR' : '');
+      div.textContent = text;
+      container.appendChild(div);
+      if (autoScroll) container.scrollTop = container.scrollHeight;
+    }
+
+    // carica storico
+    fetch('/api/logs/history')
+      .then(r => r.json())
+      .then(lines => lines.forEach(appendLine));
+
+    // stream live
+    const es = new EventSource('/api/logs/stream');
+    es.onmessage = e => appendLine(e.data);
+    es.onopen = () => { statusEl.className = ''; };
+    es.onerror = () => { statusEl.className = 'disconnected'; };
+  </script>
+</body>
+</html>
